@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, X, Package, ShoppingBag, Star, Trash2, Plus, Upload, CheckCircle, Clock, Sparkles, ChevronDown } from 'lucide-react';
 import { apiGet, apiPost, apiPut, apiDelete, type Product, type Order, type Review } from '../lib/api';
 
-const ADMIN_PASS = 'ramiya2024';
+const ADMIN_PASS = 'ramiyaknows';
 
 type Tab = 'orders' | 'products' | 'reviews';
 
