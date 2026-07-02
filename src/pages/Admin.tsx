@@ -234,13 +234,23 @@ export default function Admin({ onClose }: { onClose: () => void }) {
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--lavender-soft)]/40 border border-[var(--lavender-soft)] focus:outline-none focus:border-[var(--lavender)] text-sm" />
                     <textarea value={pDesc} onChange={(e) => setPDesc(e.target.value)} placeholder="Description" rows={2}
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--lavender-soft)]/40 border border-[var(--lavender-soft)] focus:outline-none focus:border-[var(--lavender)] text-sm resize-none" />
-                    <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-[var(--lavender)] rounded-2xl py-5 cursor-pointer hover:bg-[var(--lavender-soft)]/30">
-                      <div className="flex flex-wrap gap-2">
-  {pImgs.map((url, i) => <img key={i} src={url} className="h-16 w-16 object-cover rounded-xl" />)}
-  {pImgs.length < 4 && <div className="h-16 w-16 flex flex-col items-center justify-center gap-1"><Upload size={20} className="text-[var(--lavender-deep)]" /><span className="text-xs text-[var(--plum-soft)]">{uploading ? '...' : 'Add photo'}</span></div>}
-</div>
-<input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
-                    </label>
+                    <div className="border-2 border-dashed border-[var(--lavender)] rounded-2xl py-5 px-3">
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {pImgs.map((url, i) => (
+                          <div key={i} className="relative">
+                            <img src={url} className="h-16 w-16 object-cover rounded-xl" />
+                            <button type="button" onClick={() => setPImgs(prev => prev.filter((_, j) => j !== i))} className="absolute -top-1 -right-1 bg-red-400 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                          </div>
+                        ))}
+                        {pImgs.length < 4 && (
+                          <label className="h-16 w-16 flex flex-col items-center justify-center gap-1 border border-dashed border-[var(--lavender)] rounded-xl cursor-pointer hover:bg-[var(--lavender-soft)]/30">
+                            <Upload size={20} className="text-[var(--lavender-deep)]" />
+                            <span className="text-xs text-[var(--plum-soft)]">{uploading ? '...' : 'Add'}</span>
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
+                          </label>
+                        )}
+                      </div>
+                    </div>
                     {err && <p className="text-xs text-red-400">{err}</p>}
                     <button type="submit" className="w-full py-3 rounded-full bg-gradient-to-r from-[var(--lavender-deep)] to-[var(--pink-deep)] text-white font-medium">Add to Boutique</button>
                   </div>
