@@ -24,6 +24,8 @@ export default function Admin({ onClose }: { onClose: () => void }) {
   const [pCat, setPCat] = useState('');
   const [pDesc, setPDesc] = useState('');
   const [pImg, setPImg] = useState('');
+const [pImgs, setPImgs] = useState<string[]>([]);
+const [pImgs, setPImgs] = useState<string[]>([]);
   const [pStock, setPStock] = useState('1');
   const [uploading, setUploading] = useState(false);
 
@@ -59,7 +61,8 @@ export default function Admin({ onClose }: { onClose: () => void }) {
           body: JSON.stringify({ fileName: file.name, fileBase64: base64, contentType: file.type }),
         });
         const { url } = await res.json();
-        setPImg(url);
+        if (!pImg) setPImg(url);
+        setPImgs(prev => [...prev, url]);
         setUploading(false);
       };
       reader.readAsDataURL(file);
@@ -72,11 +75,13 @@ export default function Admin({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!pName.trim() || !pPrice.trim() || !pImg) { setErr('Name, price and image are needed.'); return; }
     try {
-      await apiPost('/api/products', {
+      
+    await apiPost('/api/products', {
         name: pName, price: Number(pPrice), image_url: pImg,
+        images: pImgs,
         description: pDesc, category: pCat || 'Boutique', stock: Number(pStock) || 0,
       });
-      setPName(''); setPPrice(''); setPCat(''); setPDesc(''); setPImg(''); setPStock('1');
+      setPName(''); setPPrice(''); setPCat(''); setPDesc(''); setPImg(''); setPStock('1'); setPImgs([]);
       setErr('');
       loadAll();
     } catch (e: any) { setErr(e.message); }
@@ -227,13 +232,16 @@ export default function Admin({ onClose }: { onClose: () => void }) {
                       <input value={pStock} onChange={(e) => setPStock(e.target.value)} placeholder="Stock" type="number" inputMode="numeric"
                         className="px-3 py-2.5 rounded-xl bg-[var(--lavender-soft)]/40 border border-[var(--lavender-soft)] focus:outline-none focus:border-[var(--lavender)] text-sm" />
                     </div>
-                    <input value={pCat} onChange={(e) => setPCat(e.target.value)} placeholder="Category (e.g. Accessories)"
+                    <input vale={pCat} onChange={(e) => setPCat(e.target.value)} placeholder="Category (e.g. Accessories)"
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--lavender-soft)]/40 border border-[var(--lavender-soft)] focus:outline-none focus:border-[var(--lavender)] text-sm" />
                     <textarea value={pDesc} onChange={(e) => setPDesc(e.target.value)} placeholder="Description" rows={2}
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--lavender-soft)]/40 border border-[var(--lavender-soft)] focus:outline-none focus:border-[var(--lavender)] text-sm resize-none" />
                     <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-[var(--lavender)] rounded-2xl py-5 cursor-pointer hover:bg-[var(--lavender-soft)]/30">
-                      {pImg ? <img src={pImg} className="h-20 w-20 object-cover rounded-xl" /> : <><Upload size={20} className="text-[var(--lavender-deep)]" /><span className="text-xs text-[var(--plum-soft)]">{uploading ? 'Uploading...' : 'Upload photo'}</span></>}
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
+                      <div className="flex flex-wrap gap-2">
+  {pImgs.map((url, i) => <img key={i} src={url} className="h-16 w-16 object-cover rounded-xl" />)}
+  {pImgs.length < 4 && <div className="h-16 w-16 flex flex-col items-center justify-center gap-1"><Upload size={20} className="text-[var(--lavender-deep)]" /><span className="text-xs text-[var(--plum-soft)]">{uploading ? '...' : 'Add photo'}</span></div>}
+</div>
+<input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
                     </label>
                     {err && <p className="text-xs text-red-400">{err}</p>}
                     <button type="submit" className="w-full py-3 rounded-full bg-gradient-to-r from-[var(--lavender-deep)] to-[var(--pink-deep)] text-white font-medium">Add to Boutique</button>

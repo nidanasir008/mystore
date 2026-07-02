@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ShoppingBag, Star, ZoomIn } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Star, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product } from '../lib/api';
 import { useCart } from '../contexts/CartContext';
 
@@ -8,6 +8,16 @@ export default function ProductModal({ product, onClose }: { product: Product | 
   const { add } = useCart();
   const [zoomed, setZoomed] = useState(false);
   const [qty, setQty] = useState(1);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  if (!product) return null;
+
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : [product.image_url];
+
+  const prev = () => setImgIndex(i => (i - 1 + images.length) % images.length);
+  const next = () => setImgIndex(i => (i + 1) % images.length);
 
   return (
     <AnimatePresence>
@@ -25,22 +35,35 @@ export default function ProductModal({ product, onClose }: { product: Product | 
             transition={{ type: 'spring', stiffness: 260, damping: 26 }}
             className="relative bg-[var(--cream)] rounded-3xl shadow-luxe w-full max-w-4xl max-h-[92vh] overflow-hidden grid md:grid-cols-2"
           >
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 z-20 p-2 rounded-full bg-white/80 backdrop-blur text-[var(--plum)] hover:bg-white shadow-soft"
-              aria-label="Close"
-            >
+            <button onClick={onClose} className="absolute top-3 right-3 z-20 p-2 rounded-full bg-white/80 backdrop-blur text-[var(--plum)] hover:bg-white shadow-soft">
               <X size={18} />
             </button>
 
             {/* Image side */}
             <div className="relative bg-[var(--lavender-soft)] h-64 md:h-auto">
               <img
-                src={product.image_url}
+                src={images[imgIndex]}
                 alt={product.name}
                 onClick={() => setZoomed(true)}
-                className="w-full h-full object-cover cursor-zoom-in"
+                className="w-full h-full object-cover cursor-zoom-in transition-all duration-300"
               />
+              {images.length > 1 && (
+                <>
+                  <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-soft">
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-soft">
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-1.5">
+                    {images.map((_, i) => (
+                      <button key={i} onClick={() => setImgIndex(i)}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIndex ? 'bg-white w-3' : 'bg-white/50'}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
               <div className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur text-[10px] text-[var(--plum-soft)]">
                 <ZoomIn size={11} /> tap to view full frame
               </div>
@@ -65,17 +88,13 @@ export default function ProductModal({ product, onClose }: { product: Product | 
                 ))}
                 <span className="text-[11px] text-[var(--plum-soft)] ml-1">loved by buyers</span>
               </div>
-
               <div className="font-display text-3xl font-semibold text-[var(--pink-deep)] mt-3">
                 Rs. {product.price}
               </div>
-
               <div className="gold-line h-px w-full my-4 opacity-40" />
-
               <p className="text-sm text-[var(--plum-soft)] leading-relaxed flex-1">
                 {product.description || 'A lovely piece from our curated collection, handpicked with love just for you.'}
               </p>
-
               {product.stock > 0 && (
                 <div className="flex items-center gap-3 mt-5">
                   <span className="text-xs text-[var(--plum-soft)]">Quantity</span>
@@ -91,7 +110,6 @@ export default function ProductModal({ product, onClose }: { product: Product | 
                   <span className="text-[11px] text-[var(--plum-soft)]/70">{product.stock} in stock</span>
                 </div>
               )}
-
               <button
                 disabled={product.stock <= 0}
                 onClick={() => { for (let i = 0; i < qty; i++) add(product); onClose(); }}
@@ -105,7 +123,6 @@ export default function ProductModal({ product, onClose }: { product: Product | 
             </div>
           </motion.div>
 
-          {/* Full-frame zoom overlay */}
           <AnimatePresence>
             {zoomed && (
               <motion.div
@@ -113,10 +130,7 @@ export default function ProductModal({ product, onClose }: { product: Product | 
                 onClick={() => setZoomed(false)}
                 className="absolute inset-0 z-30 bg-[var(--plum)]/90 backdrop-blur-lg flex items-center justify-center p-4 cursor-zoom-out"
               >
-                <button
-                  onClick={() => setZoomed(false)}
-                  className="absolute top-4 right-4 p-2.5 rounded-full bg-white/80 text-[var(--plum)] hover:bg-white z-10"
-                >
+                <button onClick={() => setZoomed(false)} className="absolute top-4 right-4 p-2.5 rounded-full bg-white/80 text-[var(--plum)] hover:bg-white z-10">
                   <X size={20} />
                 </button>
                 <motion.img
@@ -124,7 +138,7 @@ export default function ProductModal({ product, onClose }: { product: Product | 
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-                  src={product.image_url}
+                  src={images[imgIndex]}
                   alt={product.name}
                   className="max-w-full max-h-full object-contain rounded-2xl shadow-luxe"
                 />
