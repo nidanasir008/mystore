@@ -23,6 +23,7 @@ export default function Admin({ onClose }: { onClose: () => void }) {
   const [pPrice, setPPrice] = useState('');
   const [pCat, setPCat] = useState('');
   const [pDesc, setPDesc] = useState('');
+  const [pImgs, setPImgs] = useState<string[]>([]);
   const [pImg, setPImg] = useState('');
 const [pImgs, setPImgs] = useState<string[]>([]);
 const [pImgs, setPImgs] = useState<string[]>([]);

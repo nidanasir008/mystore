@@ -53,6 +53,7 @@ export interface Product {
   name: string;
   price: number;
   image_url: string;
+  images?: string[];
   description: string;
   category: string;
   stock: number;
