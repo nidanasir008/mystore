@@ -7,6 +7,39 @@ import ProductModal from '../components/ProductModal';
 import Reviews from './Reviews';
 import { CHAT_LINK, SHOP_LINK } from '../lib/api';
 
+function Carousel({ images }: { images: { url: string; name: string }[] }) {
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setCurrent(i => (i + 1) % images.length), 3000);
+    return () => clearInterval(t);
+  }, [images.length]);
+  if (images.length === 0) return null;
+  return (
+    <div className="relative w-full h-72 sm:h-96 rounded-3xl overflow-hidden shadow-luxe">
+      {images.map((img, i) => (
+        <div
+          key={i}
+          className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-6">
+            <p className="text-white font-display text-xl">{img.name}</p>
+          </div>
+        </div>
+      ))}
+      <div className="absolute bottom-4 right-4 flex gap-2">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2 h-2 rounded-full transition-all ${i === current ? 'bg-white w-4' : 'bg-white/50'}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +118,13 @@ export default function Shop() {
           </p>
         </div>
       </section>
+      
+      {/* CAROUSEL */}
+{products.length > 0 && (
+  <section className="max-w-6xl mx-auto px-6 py-8">
+    <Carousel images={products.slice(0, 5).map(p => ({ url: p.image_url, name: p.name }))} />
+  </section>
+)}
 
       {/* SHOP GRID */}
       <section id="shop" className="max-w-6xl mx-auto px-6 py-16">
